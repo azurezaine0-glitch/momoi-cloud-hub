@@ -145,7 +145,7 @@
 
 <script>
   // GANTI "index.html" DENGAN NAMA FILE WEB UTAMA KAMU
-  const targetUrl = "index.html"; 
+  const targetUrl = "playwithmomoi.html"; 
 
   // Waktu loading (dalam milidetik). 2500 = 2.5 detik
   const loadingTime = 2500; 
