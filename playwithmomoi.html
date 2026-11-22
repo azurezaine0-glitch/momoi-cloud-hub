@@ -1,0 +1,830 @@
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Momoi Cloud Hub</title>
+<style>
+  :root {
+    --bg-color: #12050b; 
+    --text-color: #f8e1e9;
+    --sidebar-bg: rgba(25, 5, 15, 0.98);
+    --accent-color: #ff1e78; 
+    --accent-secondary: #d4145a; 
+    --card-bg: rgba(35, 10, 20, 0.85);
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); user-select: none; }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    transition: background 0.5s ease;
+    min-height: 100vh;
+    background-image: url('momoiwal.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  /* Overlay gelap biar teks kebaca */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 5, 11, 0.6); 
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* --- HEADER --- */
+  .header-image {
+    width: 100%;
+    height: 120px; 
+    background-image: url('momoi.png');
+    background-size: contain; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #000; 
+    border-bottom: 4px solid var(--accent-color);
+    box-shadow: 0 4px 15px rgba(255, 30, 120, 0.4);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  /* --- KONTEN UTAMA --- */
+  .main-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* Search */
+  .search-container { width: 100%; max-width: 600px; position: relative; }
+  .search-input {
+    width: 100%; padding: 15px 20px; border-radius: 30px;
+    border: 2px solid var(--accent-color);
+    background: rgba(0, 0, 0, 0.7); color: white;
+    font-size: 1rem; outline: none; transition: 0.3s;
+    box-shadow: 0 0 15px rgba(255, 30, 120, 0.2);
+  }
+  .search-input:focus { box-shadow: 0 0 25px rgba(255, 30, 120, 0.6); border-color: #ff6b9e; }
+
+  /* Grid Menu APK */
+  .menu-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    width: 100%; max-width: 600px;
+  }
+  .menu-card {
+    background: var(--card-bg); border: 2px solid var(--accent-secondary);
+    border-radius: 15px; padding: 15px 10px; text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-decoration: none; color: var(--text-color);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .menu-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255, 30, 120, 0.5); border-color: var(--accent-color); }
+  .menu-card img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; border-radius: 10px; }
+  .menu-card h2 { font-size: 1rem; color: var(--accent-color); margin-bottom: 5px; }
+  .menu-card p { font-size: 0.75rem; color: #aaa; }
+
+  /* --- SIDEBAR & PROFIL --- */
+  .drag-handle {
+    position: fixed; top: 50%; left: 0; transform: translateY(-50%);
+    width: 30px; height: 80px; background: var(--accent-color);
+    border-radius: 0 15px 15px 0; z-index: 100;
+    display: flex; justify-content: center; align-items: center;
+    color: white; font-size: 1.2rem; box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    cursor: grab; touch-action: none; 
+  }
+  .sidebar {
+    position: fixed; top: 0; left: -340px; width: 340px; height: 100%;
+    background: var(--sidebar-bg); z-index: 200; padding: 20px;
+    display: flex; flex-direction: column; gap: 15px;
+    box-shadow: 5px 0 20px rgba(0,0,0,0.8); overflow-y: auto;
+    border-right: 3px solid var(--accent-color); touch-action: pan-y; 
+    transition: left 0.3s ease;
+  }
+  .sidebar.open { left: 0; }
+  .sidebar h3 { text-align: center; color: var(--accent-color); border-bottom: 2px dashed var(--accent-color); padding-bottom: 10px; font-size: 1.1rem; }
+
+  .digital-clock {
+    text-align: center; font-size: 1.5rem; font-weight: bold;
+    color: var(--accent-color); background: rgba(0,0,0,0.5);
+    padding: 10px; border-radius: 10px; border: 1px solid var(--accent-secondary);
+    letter-spacing: 2px; font-family: 'Courier New', Courier, monospace;
+    text-shadow: 0 0 10px rgba(255, 30, 120, 0.5);
+  }
+
+  .profile-section { 
+    display: flex; align-items: center; gap: 15px; 
+    background: rgba(255, 30, 120, 0.1); padding: 10px; 
+    border-radius: 12px; border: 1px solid var(--accent-secondary); 
+  }
+  .profile-pic-wrapper { position: relative; width: 65px; height: 65px; }
+  .profile-pic { 
+    width: 100%; height: 100%; border-radius: 50%; 
+    border: 3px solid var(--accent-color); object-fit: cover; 
+    background: #333; 
+  }
+  .upload-avatar-btn {
+    position: absolute; bottom: -5px; right: -5px;
+    background: var(--accent-color); color: white;
+    width: 25px; height: 25px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.7rem; cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    border: 2px solid white;
+  }
+  .profile-info { flex: 1; }
+  .profile-info input { 
+    width: 100%; background: transparent; border: none; 
+    border-bottom: 1px solid var(--accent-color); color: white; 
+    font-size: 1rem; font-weight: bold; outline: none; margin-bottom: 5px; 
+  }
+  .avatar-options { display: flex; gap: 10px; margin-top: 5px; align-items: center; }
+  .avatar-options img { 
+    width: 35px; height: 35px; border-radius: 50%; 
+    cursor: pointer; border: 2px solid transparent; transition: 0.2s; 
+  }
+  .avatar-options img:hover { border-color: var(--accent-color); transform: scale(1.1); }
+
+  .checkin-box { background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--accent-secondary); }
+  .points { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
+  .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; background: var(--accent-color); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; font-size: 0.9rem; }
+  .btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+  .btn-buy { background: var(--accent-secondary); }
+  .btn-admin { background: #ff9800; }
+  .btn-speedtest { background: #00bfff; }
+  .cooldown-text { font-size: 0.8rem; color: #ff6b9e; font-weight: bold; margin-top: 10px; }
+
+  .bg-section { background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; border: 1px solid #444; }
+  .file-input { width: 100%; padding: 8px; margin-top: 10px; font-size: 0.8rem; background: #222; color: white; border: 1px solid #555; border-radius: 5px; }
+  #adminSection { display: none; background: rgba(255, 152, 0, 0.1); padding: 15px; border-radius: 12px; border: 1px solid #ff9800; flex-direction: column; gap: 10px; }
+  #adminSection.active { display: flex; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 150; display: none; backdrop-filter: blur(3px); }
+  .overlay.active { display: block; }
+  .no-result { grid-column: span 2; text-align: center; color: #aaa; padding: 20px; font-style: italic; }
+
+  .floating-window {
+    position: fixed; top: 5%; left: 5%; width: 90%; height: 85%;
+    background: #fff; border-radius: 15px; z-index: 300; display: none; flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 3px solid var(--accent-color); overflow: hidden;
+  }
+  .floating-window.active { display: flex; }
+  .floating-header { background: var(--accent-color); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+  .btn-close-float { background: rgba(0,0,0,0.3); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .floating-window iframe { flex: 1; width: 100%; border: none; background: white; }
+  .float-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; display: none; }
+  .float-overlay.active { display: block; }
+
+  .choice-btn { padding: 12px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: white; width: 100%; margin-bottom: 10px;}
+  .choice-web { background: #00bfff; }
+  .choice-store { background: #28a745; }
+
+  /* =========================================
+     FITUR SAMBUTAN MOMOI (VISUAL NOVEL)
+     ========================================= */
+  .splash-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    transition: opacity 0.5s ease;
+  }
+
+  .splash-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .momoi-character {
+    position: absolute;
+    bottom: 15%;
+    width: 80%;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: slideIn 1s forwards 0.5s ease-out;
+    filter: drop-shadow(0 0 20px rgba(255, 30, 120, 0.6));
+  }
+
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dialogue-box {
+    position: relative;
+    width: 95%;
+    max-width: 600px;
+    min-height: 150px;
+    background: rgba(20, 10, 15, 0.95);
+    border: 3px solid var(--accent-color);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    padding: 25px 20px 20px 20px;
+    box-shadow: 0 0 30px rgba(255, 30, 120, 0.4);
+    z-index: 10;
+  }
+
+  .dialogue-box::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 15px 15px 15px;
+    border-style: solid;
+    border-color: transparent transparent var(--accent-color) transparent;
+  }
+
+  .speaker-name {
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    background: var(--accent-color);
+    color: white;
+    padding: 5px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 0 10px rgba(255, 30, 120, 0.5);
+    z-index: 20;
+  }
+
+  .dialogue-text {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+    min-height: 80px;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1.2rem;
+    background-color: var(--accent-color);
+    margin-left: 5px;
+    animation: blink 0.8s infinite;
+    vertical-align: bottom;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .btn-start {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(255, 30, 120, 0.5);
+  }
+
+  .btn-start.show {
+    opacity: 1;
+  }
+
+  .btn-start:hover {
+    background: #fff;
+    color: var(--accent-color);
+  }
+</style>
+</head>
+<body>
+
+  <!-- =========================================
+       FITUR SAMBUTAN MOMOI (Dikembalikan)
+       ========================================= -->
+  <div class="splash-overlay" id="splashOverlay">
+    <img src="momoi2.png" class="momoi-character" alt="Momoi" onerror="this.src='momoi5.png'">
+    
+    <div class="dialogue-box">
+      <div class="speaker-name">Momoi 📱</div>
+      <div class="dialogue-text" id="typingText"></div>
+      <button class="btn-start" id="btnStart" onclick="closeSplash()">Mulai Petualangan! 🚀</button>
+    </div>
+  </div>
+
+  <!-- UI UTAMA -->
+  <div class="drag-handle" id="dragHandle"><span id="handleIcon">›</span></div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <h3>🎀 Momoi Hub Menu</h3>
+
+    <div class="digital-clock" id="clock">00:00:00</div>
+
+    <div class="profile-section">
+      <div class="profile-pic-wrapper">
+        <img src="momoi5.png" id="profilePic" class="profile-pic" alt="Profile">
+        <label for="avatarUpload" class="upload-avatar-btn" title="Upload Foto">📷</label>
+        <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+      </div>
+      <div class="profile-info">
+        <input type="text" id="playerName" placeholder="Nama Player..." value="Sensei" onchange="saveProfile()">
+        <div class="avatar-options">
+          <img src="momoi5.png" onclick="changeAvatar('momoi5.png')" alt="Momoi">
+          <img src="midori.png" onclick="changeAvatar('midori.png')" alt="Midori">
+        </div>
+      </div>
+    </div>
+    
+    <div class="checkin-box">
+      <p style="font-size: 0.9rem; font-weight: bold; color: #fff;">Daily Check-In</p>
+      <div class="points" id="ticketDisplay">🎟️ 0 Tiket</div>
+      <button class="btn" id="btnCheckin" onclick="doCheckin()">Check-In Sekarang</button>
+      <div class="cooldown-text" id="cooldownText">Siap check-in!</div>
+    </div>
+    
+    <div style="margin-top: 5px;">
+      <input type="text" id="redeemInput" placeholder="Kode Rahasia..." style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--accent-secondary); background: #222; color: white; outline: none;">
+      <button class="btn btn-admin" onclick="redeemCode()" style="margin-top: 8px;">Redeem Kode</button>
+    </div>
+
+    <div style="margin-top: 5px;">
+      <button class="btn btn-speedtest" onclick="openSpeedtest()">🚀 Test Jaringan (Speedtest)</button>
+    </div>
+    
+    <div class="bg-section">
+      <h3 style="border: none; padding: 0; font-size: 1rem; margin-bottom: 5px;">🖼️ Ganti Wallpaper</h3>
+      <p style="font-size: 0.75rem; text-align: center; color: #aaa;">Upload fotomu (5 Tiket)</p>
+      <input type="file" id="bgUpload" class="file-input" accept="image/*" onchange="handleImageUpload(event)">
+      <button class="btn btn-buy" onclick="buyCustomBg()" id="buyCustomBtn" style="margin-top: 8px;">Beli Slot Custom (5 Tiket)</button>
+      <button class="btn" onclick="resetBackground()" style="background: #555; margin-top: 5px;">Reset ke Default</button>
+    </div>
+    
+    <div id="adminSection">
+      <h4 style="color: #ff9800; text-align: center;">⚡ Admin Panel ⚡</h4>
+      <button class="btn" onclick="adminAddTickets()">Tambah 5 Tiket</button>
+      <button class="btn" onclick="adminResetCooldown()">Reset Cooldown Check-in</button>
+    </div>
+  </div>
+
+  <div class="header-image"></div>
+
+  <div class="main-content">
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Cloud Gaming..." oninput="searchApps()">
+    </div>
+    
+    <div class="menu-grid" id="appGrid"></div>
+  </div>
+
+  <div class="float-overlay" id="floatOverlay" onclick="closeAllFloats()"></div>
+
+  <div class="floating-window" id="choiceWindow">
+    <div class="floating-header">
+      <span id="choiceTitle">Pilih Opsi</span>
+      <button class="btn-close-float" onclick="closeAllFloats()">✖</button>
+    </div>
+    <div style="padding: 20px;">
+      <p style="font-size: 0.9rem; color: #333; margin-bottom: 15px; text-align: center;">Mau buka lewat mana?</p>
+      <a href="#" id="btnPilihanWeb" class="choice-btn choice-web" target="_blank">🌐 Buka Web (Alternatif)</a>
+      <a href="#" id="btnPilihanStore" class="choice-btn choice-store" target="_blank">📱 Buka Play Store</a>
+    </div>
+  </div>
+
+  <div class="floating-window" id="speedtestWindow">
+    <div class="floating-header">
+      <span>📶 Speedtest by Ookla</span>
+      <button class="btn-close-float" onclick="closeAllFloats()">✖ Tutup</button>
+    </div>
+    <iframe id="speedtestFrame" src=""></iframe>
+  </div>
+
+<script>
+  // =========================================
+  // FITUR SAMBUTAN MOMOI (TYPEWRITER)
+  // =========================================
+  const welcomeText = "Halo Sensei! Selamat datang di Momoi Cloud Hub! 🎀 Di sini kamu bisa main game keren lewat cloud, kumpulin tiket tiap hari buat ganti wallpaper, dan pantau jaringan pakai Speedtest. Yuk, kita mulai petualangannya! 🚀";
+  let charIndex = 0;
+  const typingSpeed = 40; 
+  const typingTextElement = document.getElementById('typingText');
+  const btnStart = document.getElementById('btnStart');
+  let typingInterval;
+
+  function typeWriter() {
+    if (charIndex < welcomeText.length) {
+      typingTextElement.innerHTML = welcomeText.substring(0, charIndex + 1) + '<span class="cursor"></span>';
+      charIndex++;
+      typingInterval = setTimeout(typeWriter, typingSpeed);
+    } else {
+      typingTextElement.innerHTML = welcomeText; 
+      btnStart.classList.add('show');
+    }
+  }
+
+  window.onload = () => {
+    setTimeout(typeWriter, 1000); 
+  };
+
+  function closeSplash() {
+    const splash = document.getElementById('splashOverlay');
+    splash.classList.add('hidden');
+    setTimeout(() => {
+      splash.style.display = 'none';
+    }, 500);
+  }
+
+  // =========================================
+  // KOMPRES GAMBAR
+  // =========================================
+  function compressImage(file, maxWidth, maxHeight, callback) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(event) {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        callback(dataUrl);
+      }
+    }
+  }
+
+  // =========================================
+  // DATA APLIKASI CLOUD
+  // =========================================
+  const allApps = [
+    { 
+      name: "CloudMoon", desc: "Cloud Gaming Alternatif (top2 recomended)", img: "apk2.png", 
+      webLink: "apk2.html", storeLink: "https://play.google.com/store/apps/details?id=com.nianwei.cloudphone", 
+      keywords: "cloud moon cloudmoon apk2" 
+    },
+    { 
+      name: "EasyFun", desc: "Cloud Gaming Alternatif (top 1 recomended)", img: "apk1.png", 
+      webLink: "apk1.html", storeLink: "https://play.google.com/store/apps/details?id=gg.easyfun.app", 
+      keywords: "easy fun easyfun apk1" 
+    },
+    { 
+      name: "GeForce Now", desc: "Nvidia Cloud Gaming (belum tersedia di indonesia harus pake vpn)", img: "geforcenow.png", 
+      storeLink: "https://play.google.com/store/apps/details?id=com.nvidia.geforcenow", 
+      keywords: "nvidia geforce now cloud" 
+    },
+    { 
+      name: "PSPlay", desc: "PlayStation Remote Play", img: "psplay.png", 
+      storeLink: "https://play.google.com/store/apps/details?id=psplay.grill.com", 
+      keywords: "playstation ps play remote" 
+    },
+    { 
+      name: "Boosteroid", desc: "Cloud Gaming Global (akses awal)", img: "boosteroid.png", 
+      storeLink: "https://play.google.com/store/apps/details?id=com.boosteroid.streaming", 
+      keywords: "boosteroid cloud gaming" 
+    },
+    { 
+      name: "Blacknut", desc: "Cloud Gaming Premium (akses awal)", img: "blacknut.png", 
+      storeLink: "https://play.google.com/store/apps/details?id=com.blacknut.app", 
+      keywords: "blacknut cloud gaming" 
+    },
+    { 
+      name: "UgPhone", desc: "Virtual Phone Cloud (tidak terlalu di sarankan)", img: "ugphone.png", 
+      storeLink: "https://play.google.com/store/apps/details?id=com.tykeji.ugphone", 
+      keywords: "ugphone cloud phone" 
+    }
+  ];
+
+  const appGrid = document.getElementById('appGrid');
+  const searchInput = document.getElementById('searchInput');
+
+  function renderApps(appsToRender) {
+    appGrid.innerHTML = '';
+    if (appsToRender.length === 0) {
+      appGrid.innerHTML = '<div class="no-result">Aplikasi tidak ditemukan 😭</div>';
+      return;
+    }
+    appsToRender.forEach(app => {
+      const card = document.createElement('div');
+      card.className = 'menu-card';
+      
+      if (app.webLink) {
+        card.onclick = () => showChoice(app.name, app.webLink, app.storeLink);
+      } else {
+        card.onclick = () => window.open(app.storeLink, '_blank');
+      }
+
+      card.innerHTML = `
+        <img src="${app.img}" onerror="this.src='apk1.png'" alt="${app.name}">
+        <h2>${app.name}</h2>
+        <p>${app.desc}</p>
+      `;
+      appGrid.appendChild(card);
+    });
+  }
+
+  function searchApps() {
+    const query = searchInput.value.toLowerCase();
+    let filteredApps = allApps.filter(app => 
+      app.name.toLowerCase().includes(query) || app.keywords.includes(query)
+    );
+    if (query.includes("cloud") || query === "") {
+      filteredApps.sort((a, b) => {
+        if (a.name === "CloudMoon") return -1;
+        if (b.name === "CloudMoon") return 1;
+        if (a.name === "EasyFun") return -1;
+        if (b.name === "EasyFun") return 1;
+        return 0;
+      });
+    }
+    renderApps(filteredApps);
+  }
+
+  // =========================================
+  // JAM DIGITAL
+  // =========================================
+  function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // =========================================
+  // JENDELA MELAYANG
+  // =========================================
+  const choiceWindow = document.getElementById('choiceWindow');
+  const speedtestWindow = document.getElementById('speedtestWindow');
+  const floatOverlay = document.getElementById('floatOverlay');
+
+  function showChoice(appName, webUrl, storeUrl) {
+    document.getElementById('choiceTitle').innerText = appName;
+    document.getElementById('btnPilihanWeb').href = webUrl;
+    document.getElementById('btnPilihanStore').href = storeUrl;
+    
+    choiceWindow.classList.add('active');
+    floatOverlay.classList.add('active');
+  }
+
+  function openSpeedtest() {
+    document.getElementById('speedtestFrame').src = "https://www.speedtest.net/";
+    speedtestWindow.classList.add('active');
+    floatOverlay.classList.add('active');
+    closeSidebar(); 
+  }
+
+  function closeAllFloats() {
+    choiceWindow.classList.remove('active');
+    speedtestWindow.classList.remove('active');
+    floatOverlay.classList.remove('active');
+    document.getElementById('speedtestFrame').src = ""; 
+  }
+
+  // =========================================
+  // PROFIL PLAYER & CUSTOM AVATAR
+  // =========================================
+  let playerName = localStorage.getItem('momoi_player_name') || 'Sensei';
+  let playerAvatar = localStorage.getItem('momoi_player_avatar') || 'momoi5.png';
+
+  function loadProfile() {
+    document.getElementById('playerName').value = playerName;
+    document.getElementById('profilePic').src = playerAvatar;
+  }
+
+  function saveProfile() {
+    playerName = document.getElementById('playerName').value;
+    localStorage.setItem('momoi_player_name', playerName);
+  }
+
+  function changeAvatar(imgSrc) {
+    playerAvatar = imgSrc;
+    document.getElementById('profilePic').src = imgSrc;
+    localStorage.setItem('momoi_player_avatar', imgSrc);
+  }
+
+  function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    compressImage(file, 300, 300, function(base64Image) {
+      playerAvatar = base64Image;
+      document.getElementById('profilePic').src = base64Image;
+      localStorage.setItem('momoi_player_avatar', base64Image);
+      alert("Foto profil berhasil diubah dan disimpan!");
+    });
+  }
+
+  // =========================================
+  // SISTEM TIKET, CHECK-IN & ADMIN
+  // =========================================
+  const COOLDOWN_MS = 24 * 60 * 60 * 1000; 
+  const HARGA_BG = 5;
+  const ADMIN_CODE = "playwithmomoi😋";
+
+  let tickets = parseInt(localStorage.getItem('momoi_tickets')) || 0;
+  let lastCheckin = parseInt(localStorage.getItem('momoi_last_checkin')) || 0;
+  let isAdmin = localStorage.getItem('momoi_admin') === 'true';
+  let hasCustomBg = localStorage.getItem('momoi_has_custom_bg') === 'true';
+  let customBgData = localStorage.getItem('momoi_custom_bg_data') || '';
+
+  const ticketDisplay = document.getElementById('ticketDisplay');
+  const btnCheckin = document.getElementById('btnCheckin');
+  const cooldownText = document.getElementById('cooldownText');
+  const adminSection = document.getElementById('adminSection');
+  const buyCustomBtn = document.getElementById('buyCustomBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const dragHandle = document.getElementById('dragHandle');
+  const handleIcon = document.getElementById('handleIcon');
+
+  // --- LOGIKA DRAG SIDEBAR ---
+  let isDragging = false;
+  let startX = 0;
+  let currentX = 0;
+  const sidebarWidth = 340;
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    handleIcon.innerText = '‹';
+    dragHandle.style.left = sidebarWidth + 'px';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    handleIcon.innerText = '›';
+    dragHandle.style.left = '0px';
+  }
+
+  dragHandle.addEventListener('touchstart', (e) => {
+    isDragging = true; startX = e.touches[0].clientX; currentX = startX;
+    sidebar.style.transition = 'none'; dragHandle.style.transition = 'none';
+  });
+
+  dragHandle.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX;
+    let diff = currentX - startX;
+    let newLeft = 0; let handleLeft = 0;
+
+    if (sidebar.classList.contains('open')) {
+      newLeft = Math.min(0, Math.max(-sidebarWidth, diff));
+      handleLeft = sidebarWidth + newLeft;
+    } else {
+      newLeft = Math.max(-sidebarWidth, Math.min(0, -sidebarWidth + diff));
+      handleLeft = sidebarWidth + newLeft;
+    }
+    sidebar.style.left = newLeft + 'px';
+    dragHandle.style.left = handleLeft + 'px';
+  });
+
+  dragHandle.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    const currentLeft = parseInt(sidebar.style.left);
+    sidebar.style.transition = 'left 0.3s ease';
+    dragHandle.style.transition = 'left 0.3s ease';
+    
+    if (currentLeft > -(sidebarWidth / 2)) { openSidebar(); } 
+    else { closeSidebar(); }
+  });
+
+  dragHandle.addEventListener('click', () => {
+    if (!sidebar.classList.contains('open')) { openSidebar(); } 
+    else { closeSidebar(); }
+  });
+
+  // --- CHECK IN & ADMIN ---
+  function doCheckin() {
+    const now = Date.now();
+    if (now - lastCheckin >= COOLDOWN_MS) {
+      tickets += 1; lastCheckin = now;
+      localStorage.setItem('momoi_tickets', tickets);
+      localStorage.setItem('momoi_last_checkin', lastCheckin);
+      updateUI();
+      alert("Check-in berhasil! Kamu dapat 1 Tiket 🎟️");
+    }
+  }
+
+  function redeemCode() {
+    const input = document.getElementById('redeemInput').value;
+    if (input === ADMIN_CODE) {
+      isAdmin = true; localStorage.setItem('momoi_admin', 'true');
+      alert("Kode Admin Berhasil! Panel Admin telah dibuka.");
+      updateUI(); document.getElementById('redeemInput').value = '';
+    } else { alert("Kode salah atau tidak valid!"); }
+  }
+
+  function adminAddTickets() {
+    if (!isAdmin) return;
+    tickets += 5; localStorage.setItem('momoi_tickets', tickets); updateUI();
+  }
+
+  function adminResetCooldown() {
+    if (!isAdmin) return;
+    lastCheckin = 0; localStorage.setItem('momoi_last_checkin', lastCheckin); updateUI();
+  }
+
+  // --- BACKGROUND CUSTOM ---
+  let tempImageData = null;
+
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    compressImage(file, 1080, 1920, function(base64Image) {
+      tempImageData = base64Image;
+      alert("Foto berhasil dimuat & dikompres! Klik 'Beli Slot Custom' untuk memasang.");
+    });
+  }
+
+  function buyCustomBg() {
+    if (!tempImageData && !customBgData) { alert("Pilih foto dulu!"); return; }
+    if (hasCustomBg || isAdmin) { applyCustomBg(tempImageData || customBgData); }
+    else {
+      if (tickets >= HARGA_BG) {
+        tickets -= HARGA_BG; hasCustomBg = true;
+        localStorage.setItem('momoi_tickets', tickets);
+        localStorage.setItem('momoi_has_custom_bg', 'true');
+        applyCustomBg(tempImageData);
+        alert("Berhasil membeli slot! Wallpaper dipasang.");
+      } else { alert("Tiket kurang! Butuh 5 tiket."); }
+    }
+  }
+
+  function applyCustomBg(base64Image) {
+    if (!base64Image) return;
+    document.body.style.backgroundImage = `url(${base64Image})`;
+    localStorage.setItem('momoi_custom_bg_data', base64Image);
+    updateUI(); closeSidebar();
+  }
+
+  function resetBackground() {
+    document.body.style.backgroundImage = `url('momoiwal.png')`;
+    localStorage.removeItem('momoi_custom_bg_data');
+    tempImageData = null; document.getElementById('bgUpload').value = '';
+    alert("Wallpaper kembali ke default!"); closeSidebar();
+  }
+
+  function updateUI() {
+    ticketDisplay.innerText = `🎟️ ${tickets} Tiket`;
+    const now = Date.now();
+    const timeDiff = now - lastCheckin;
+    if (timeDiff < COOLDOWN_MS) {
+      btnCheckin.disabled = true;
+      const timeLeft = COOLDOWN_MS - timeDiff;
+      const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
+      const seconds = Math.floor((timeLeft / 1000) % 60);
+      cooldownText.innerText = `Tunggu ${hours}j ${minutes}m ${seconds}d lagi.`;
+    } else {
+      btnCheckin.disabled = false; cooldownText.innerText = "Siap check-in!"; cooldownText.style.color = "#ff6b9e";
+    }
+    if (hasCustomBg || isAdmin) {
+      buyCustomBtn.innerText = "Pasang Wallpaper (Gratis)"; buyCustomBtn.disabled = false;
+    } else {
+      buyCustomBtn.innerText = `Beli Slot Custom (${HARGA_BG} Tiket)`; buyCustomBtn.disabled = tickets < HARGA_BG;
+    }
+    if (isAdmin) adminSection.classList.add('active'); else adminSection.classList.remove('active');
+  }
+
+  // --- INIT ---
+  loadProfile();
+  if (customBgData) { document.body.style.backgroundImage = `url(${customBgData})`; }
+  renderApps(allApps); 
+  updateUI();
+  setInterval(updateUI, 1000);
+
+</script>
+</body>
+</html>
