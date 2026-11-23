@@ -28,7 +28,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Warna gelap transisi ke pink gelap */
             background: radial-gradient(circle at center, #2a0010, #12050b);
             z-index: 1000;
             display: flex;
@@ -92,7 +91,7 @@
             text-align: center;
         }
 
-        /* ================= MAIN LOBBY ================= */
+        /* ================= MAIN LOBBY (Background pas loading) ================= */
         .lobby {
             position: fixed;
             top: 0;
@@ -104,21 +103,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.8s ease;
             overflow: hidden;
-        }
-
-        .lobby.active {
-            opacity: 1;
-            visibility: visible;
         }
 
         /* Efek bintang */
         .star {
             position: absolute;
-            background: #ff6b9e; /* Bintang warna pink */
+            background: #ff6b9e; 
             border-radius: 50%;
             pointer-events: none;
             animation: twinkle 2s infinite alternate;
@@ -148,106 +139,6 @@
             100% { transform: translate(50px, 50px) scale(1.2); opacity: 0.6; }
         }
 
-        /* Konten Lobby */
-        .content {
-            text-align: center;
-            z-index: 10;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo-icon {
-            font-size: 100px;
-            margin-bottom: 20px;
-            color: #ff1e78;
-            filter: drop-shadow(0 0 30px rgba(255,30,120,0.5));
-            animation: logoGlow 3s infinite alternate;
-        }
-
-        @keyframes logoGlow {
-            0% { filter: drop-shadow(0 0 20px rgba(255,30,120,0.3)); }
-            100% { filter: drop-shadow(0 0 50px rgba(255,30,120,0.8)); }
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            background: linear-gradient(135deg, #fff, #ffb3d1, #ff1e78);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: #f8e1e9;
-            font-size: 1rem;
-            margin-bottom: 50px;
-            letter-spacing: 3px;
-        }
-
-        /* Tombol ENJOY */
-        .enjoy-btn {
-            background: linear-gradient(135deg, #ff1e78, #d4145a);
-            border: none;
-            padding: 18px 50px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-            border-radius: 60px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(255,30,120,0.5);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 0 auto;
-        }
-
-        .enjoy-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .enjoy-btn:hover::before { left: 100%; }
-
-        .enjoy-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(255,30,120,0.8);
-        }
-
-        .enjoy-btn i {
-            font-size: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-
-        .enjoy-btn:hover i {
-            transform: translateX(8px);
-        }
-
-        /* Footer */
-        .footer {
-            position: absolute;
-            bottom: 30px;
-            color: #d4145a;
-            font-size: 12px;
-            z-index: 10;
-        }
-
         /* Particle canvas */
         #particleCanvas {
             position: absolute;
@@ -258,17 +149,16 @@
             pointer-events: none;
             z-index: 5;
         }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2rem; }
-            .logo-icon { font-size: 70px; }
-            .enjoy-btn { padding: 15px 35px; font-size: 1.2rem; }
-            .subtitle { font-size: 0.8rem; margin-bottom: 30px; }
-            .progress-container { width: 250px; }
-        }
     </style>
 </head>
 <body>
+
+<!-- BACKGROUND LOBBY (Bintang & Partikel) -->
+<div class="lobby" id="lobby">
+    <canvas id="particleCanvas"></canvas>
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+</div>
 
 <!-- LOADING SCREEN -->
 <div class="loading-screen" id="loadingScreen">
@@ -285,36 +175,18 @@
     </div>
 </div>
 
-<!-- MAIN LOBBY -->
-<div class="lobby" id="lobby">
-    <canvas id="particleCanvas"></canvas>
-    <div class="nebula nebula-1"></div>
-    <div class="nebula nebula-2"></div>
-    
-    <div class="content">
-        <div class="logo-icon">
-            <i class="fas fa-moon"></i>
-        </div>
-        <h1>MOMOI HUB</h1>
-        <div class="subtitle">✦ SAIBA MOMOI'S CLOUD ✦</div>
-        <button class="enjoy-btn" id="enjoyBtn">
-            AYO MASUK! <i class="fas fa-arrow-right"></i>
-        </button>
-    </div>
-    
-    <div class="footer">
-        <i class="fas fa-star"></i> Selamat Datang Di Momoi Cloud <i class="fas fa-star"></i>
-    </div>
-</div>
-
 <script>
-    // ============ LOADING 7 DETIK ============
+    // ============ LOADING 3 DETIK ============
     let progress = 0;
     const progressBar = document.getElementById('progressBar');
     const loadingPercent = document.getElementById('loadingPercent');
     const loadingScreen = document.getElementById('loadingScreen');
-    const lobby = document.getElementById('lobby');
     
+    // Mulai animasi partikel & bintang di background dari awal
+    startParticles();
+    createStars();
+
+    // 3000ms / 100% = 30ms per 1%
     const loadingInterval = setInterval(() => {
         progress += 1;
         progressBar.style.width = progress + '%';
@@ -322,16 +194,15 @@
         
         if (progress >= 100) {
             clearInterval(loadingInterval);
-            // Selesai loading, tampilkan lobby
+            // Selesai loading, layar menghitam (fade out)
             loadingScreen.style.opacity = '0';
+            
+            // Tunggu 0.8 detik sampai fade out selesai, lalu pindah halaman
             setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                lobby.classList.add('active');
-                startParticles();
-                createStars();
+                window.location.href = 'playwithmomoi.html';
             }, 800);
         }
-    }, 70); // 100% dalam 7 detik
+    }, 30); // 100 * 30ms = 3000ms (3 detik)
     
     // ============ EFEK BINTANG STATIS ============
     function createStars() {
@@ -351,8 +222,6 @@
     }
     
     // ============ PARTICLE ANIMATION ============
-    let particleAnimation = null;
-    
     function startParticles() {
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
@@ -385,7 +254,6 @@
             for (let p of particles) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                // Partikel warna pink
                 ctx.fillStyle = `rgba(255, 30, 120, ${p.alpha})`;
                 ctx.fill();
                 
@@ -398,40 +266,11 @@
                 if (p.y > canvas.height) p.y = 0;
             }
             
-            particleAnimation = requestAnimationFrame(drawParticles);
+            requestAnimationFrame(drawParticles);
         }
         
         drawParticles();
     }
-    
-    // ============ TOMBOL ENJOY - REDIRECT KE playwithmomoi.html ============
-    const enjoyBtn = document.getElementById('enjoyBtn');
-    
-    const newBtn = enjoyBtn.cloneNode(true);
-    enjoyBtn.parentNode.replaceChild(newBtn, enjoyBtn);
-    
-    newBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        this.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            this.style.transform = 'scale(1)';
-        }, 150);
-        
-        // Redirect ke playwithmomoi.html
-        console.log('Redirecting to playwithmomoi.html...');
-        window.location.href = 'playwithmomoi.html';
-    });
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && lobby.classList.contains('active')) {
-            window.location.href = 'playwithmomoi.html';
-        }
-    });
-    
-    newBtn.addEventListener('mouseenter', () => { newBtn.style.transform = 'scale(1.05)'; });
-    newBtn.addEventListener('mouseleave', () => { newBtn.style.transform = 'scale(1)'; });
 </script>
 </body>
 </html>
